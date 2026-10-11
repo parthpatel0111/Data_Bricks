@@ -2,10 +2,11 @@ name: Deploy Ecommerce to PROD
 
 on:
   push:
-    branches: 
+    branches:
       - main
     paths:
-      - 'ecommerce_lakehouse/**'   # Only triggers when ecommerce code changes
+      - 'ecommerce_lakehouse/**'
+      - '.github/workflows/deploy_ecommerce.yml'  # <-- Add this line
 
 jobs:
   deploy:

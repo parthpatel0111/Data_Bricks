@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'global_retail_edw/**'
+      - '.github/workflows/deploy_retail.yml'  # <-- Add this line
 
 jobs:
   deploy:

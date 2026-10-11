@@ -20,7 +20,7 @@ FROM STREAM read_files(
 );
 
 -- 2. Ingest Clickstream Logs (JSON)
-CREATE OR REFRESH STREAMING TABLE bronze_clickstream_logs
+CREATE OR REFRESH STREAMING TABLE bronze_clickstream_raw   -- <-- Renamed to bypass the broken checkpoint
 COMMENT "Raw Web Clickstream JSON Data"
 AS SELECT 
   *,
@@ -29,7 +29,7 @@ AS SELECT
 FROM STREAM read_files(
   '/Volumes/${catalog}/${schema}/source_files/clickstream_daily',
   format => 'json',
-  multiline => 'true'   -- <-- Add this exact line
+  multiline => 'true'   -- <-- Added to fix the JSON parsing error
 );
 
 -- 3. Ingest ERP Orders (CSV)

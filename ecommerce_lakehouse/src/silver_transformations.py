@@ -15,7 +15,7 @@ from pyspark.sql.functions import col
 @dlt.expect("valid_session_duration", "session_duration >= 0")
 def silver_clickstream_logs():
     return (
-        dlt.read_stream("bronze_clickstream_logs")
+        dlt.read_stream("bronze_clickstream_raw")
         # Standardize column types
         .withColumn("session_duration", col("session_duration").cast("int"))
         .withColumn("customer_id", col("customer_id").cast("int"))

@@ -28,7 +28,8 @@ AS SELECT
   current_timestamp() AS ingestion_timestamp
 FROM STREAM read_files(
   '/Volumes/${catalog}/${schema}/source_files/clickstream_daily',
-  format => 'json'
+  format => 'json',
+  multiline => 'true'   -- <-- Add this exact line
 );
 
 -- 3. Ingest ERP Orders (CSV)

@@ -1,0 +1,67 @@
+bundle:
+  name: global_retail_edw
+
+variables:
+  catalog:
+    description: "Target catalog"
+    default: "ecomm_dev" 
+  schema:
+    description: "Target schema"
+    default: "global_retail"
+
+targets:
+  # 1. DEVELOPMENT
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://dbc-a8a20d4e-33ec.cloud.databricks.com
+    variables:
+      catalog: "ecomm_dev"
+      schema: "global_retail"
+
+  # 2. QUALITY ASSURANCE
+  qa:
+    mode: production
+    workspace:
+      host: https://dbc-a8a20d4e-33ec.cloud.databricks.com
+      root_path: /Workspace/Users/parth.patel23mca@vbtmca.ac.in/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: "ecomm_qa"
+      schema: "global_retail"
+
+  # 3. PRODUCTION
+  prod:
+    mode: production
+    workspace:
+      host: https://dbc-a8a20d4e-33ec.cloud.databricks.com
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: "ecomm_prod"
+      schema: "global_retail"
+
+resources:
+  pipelines:
+    retail_edw_pipeline:
+      name: "[${bundle.target}] Global Retail EDW Pipeline"
+      catalog: ${var.catalog}
+      target: ${var.schema}
+      serverless: true
+      configuration:
+        catalog: ${var.catalog}
+        schema: ${var.schema}
+      libraries:
+        - file:
+            path: ./src/bronze_ingestion.sql
+        - file:
+            path: ./src/silver_staging.py
+        - file:
+            path: ./src/gold_star_schema.py
+
+  jobs:
+    retail_edw_job:
+      name: "[${bundle.target}] Global Retail Daily Load"
+      tasks:
+        - task_key: execute_edw_pipeline
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.retail_edw_pipeline.id}

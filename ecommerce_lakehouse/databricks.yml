@@ -1,0 +1,74 @@
+bundle:
+  name: ecommerce_lakehouse
+  uuid: 00828548-64bf-4dc4-bd12-4508b97f4841
+
+include:
+  - resources/*.yml
+
+# TOP-LEVEL VARIABLES (Defaults are required here for DAB overrides to work)
+variables:
+  warehouse_id:
+    description: "The warehouse to use"
+    default: "6409d9192c64ee12"
+  catalog:
+    description: "The catalog to use"
+    default: "ecomm_dev"
+  schema:
+    description: "The schema to use"
+    default: "ecomm"
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://dbc-a8a20d4e-33ec.cloud.databricks.com
+    variables:
+      catalog: "ecomm_dev" 
+      schema: "ecommerce_lakehouse"
+      
+  qa:
+    mode: production
+    workspace:
+      host: https://dbc-a8a20d4e-33ec.cloud.databricks.com
+      root_path: /Workspace/Users/parth.patel23mca@vbtmca.ac.in/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: "ecomm_qa"
+      schema: "ecommerce_lakehouse"
+
+  prod:
+    mode: production
+    workspace:
+      host: https://dbc-a8a20d4e-33ec.cloud.databricks.com
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: "ecomm_prod"
+      schema: "ecommerce_lakehouse" 
+
+resources:
+  pipelines:
+    ecommerce_medallion_pipeline:  # <-- 1. Changed identifier to force new pipeline creation
+      name: "[${bundle.target}] E-Commerce Medallion Pipeline"
+      catalog: ${var.catalog}
+      target: ${var.schema}
+      serverless: true
+      configuration:
+        catalog: ${var.catalog}
+        schema: ${var.schema}
+      libraries:
+        - file:
+            path: ./src/bronze_ingestion.sql
+        - file:
+            path: ./src/silver_transformations.py
+        - file:
+            path: ./src/gold_aggregations.py
+            
+
+  # --- NEW: WORKFLOW ORCHESTRATION ---
+  jobs:
+    ecommerce_daily_job:  
+      name: "[${bundle.target}] E-Commerce Daily Load Job"
+      tasks:
+        - task_key: execute_medallion_pipeline
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.ecommerce_medallion_pipeline.id}

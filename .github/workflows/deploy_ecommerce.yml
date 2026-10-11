@@ -26,4 +26,4 @@ jobs:
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
           databricks bundle deploy -t prod
-          databricks bundle run -t prod ecommerce_lakehouse_job
+          databricks bundle run -t prod ecommerce_daily_job

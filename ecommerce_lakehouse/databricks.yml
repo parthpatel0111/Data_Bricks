@@ -25,7 +25,7 @@ targets:
       host: https://dbc-a8a20d4e-33ec.cloud.databricks.com
     variables:
       catalog: "ecomm_dev" 
-      schema: "ecommerce_lakehouse"
+      schema: "ecomm"
       
   qa:
     mode: production

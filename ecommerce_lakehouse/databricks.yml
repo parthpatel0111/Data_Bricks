@@ -34,7 +34,7 @@ targets:
       root_path: /Workspace/Users/parth.patel23mca@vbtmca.ac.in/.bundle/${bundle.name}/${bundle.target}
     variables:
       catalog: "ecomm_qa"
-      schema: "ecommerce_lakehouse"
+      schema: "ecomm"
 
   prod:
     mode: production
@@ -43,7 +43,7 @@ targets:
       root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
     variables:
       catalog: "ecomm_prod"
-      schema: "ecommerce_lakehouse" 
+      schema: "ecomm" 
 
 resources:
   pipelines:

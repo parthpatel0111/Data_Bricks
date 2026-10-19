@@ -1,6 +1,7 @@
 name: Deploy Retail & Mfg Lakehouse to PROD/QA
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main

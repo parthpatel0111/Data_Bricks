@@ -1,0 +1,60 @@
+bundle:
+  name: retail_mfg_lakehouse
+
+variables:
+  catalog:
+    description: "The target Unity Catalog for the environment"
+    default: "retail_mfg_dev"
+
+targets:
+  # 1. DEVELOPMENT (Sandbox)
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://dbc-a8a20d4e-33ec.cloud.databricks.com
+    variables:
+      catalog: "retail_mfg_dev"
+
+  # 2. QUALITY ASSURANCE (Staging)
+  qa:
+    mode: production
+    workspace:
+      host: https://dbc-a8a20d4e-33ec.cloud.databricks.com
+      root_path: /Workspace/Users/parth.patel23mca@vbtmca.ac.in/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: "retail_mfg_qa"
+
+  # 3. PRODUCTION
+  prod:
+    mode: production
+    workspace:
+      host: https://dbc-a8a20d4e-33ec.cloud.databricks.com
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: "retail_mfg_prod"
+
+resources:
+  pipelines:
+    retail_mfg_core_pipeline:
+      name: "[${bundle.target}] Retail & Mfg Core Data Pipeline"
+      catalog: ${var.catalog}
+      schema: gold
+      serverless: true
+      configuration:
+        catalog_name: ${var.catalog}
+      libraries:
+        - file:
+            path: ./src/bronze_ingestion.sql
+        - file:
+            path: ./src/silver_transformations.py
+        - file:
+            path: ./src/gold_star_schema.sql
+
+  jobs:
+    retail_mfg_daily_job:
+      name: "[${bundle.target}] Retail & Mfg Daily Load Job"
+      tasks:
+        - task_key: execute_core_pipeline
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.retail_mfg_core_pipeline.id}
